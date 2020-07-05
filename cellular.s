@@ -180,7 +180,19 @@ even:
 
 loop_run_generations:
 	bgt	$t1, $s2, end_run_generation	# if (g > n_generations) goto end_run_generation
-			# function call: run_generation(world_size, g, rule);
+
+	# function call: run_generation(world_size, g, rule);
+	sub  	$sp, $sp, 4   			# move stack pointer down to make room
+    	sw   	$ra, 0($sp)    			# save $ra on $stack
+
+    	jal  	run_generation			# set $ra to following address
+
+    	lw   	$ra, 0($sp)    			# recover $ra from $stack
+    	add  	$sp, $sp, 4    			# move stack pointer back to what it was
+
+    	li   	$v0, 0         			# return 0 from function main
+    	jr   	$ra            			#
+
 	add 	$t1, $t1, 1;
 	b	loop_run_generations		# goto loop_run_generations
 end_run_generation:
@@ -190,7 +202,19 @@ end_run_generation:
 
 loop_reverse_print_generation:
 	blt	$t1, 0, end_loop_print_generation	# if (g < 0) goto end_loop_print_generation;
-			# function call: print_generation(world_size, g);
+
+	# function call: print_generation(world_size, g);
+	sub  	$sp, $sp, 4    			# move stack pointer down to make room
+    	sw   	$ra, 0($sp)    			# save $ra on $stack
+
+    	jal  	print_generation		# set $ra to following address
+
+    	lw   	$ra, 0($sp)    			# recover $ra from $stack
+    	add  	$sp, $sp, 4    			# move stack pointer back to what it was
+
+    	li   	$v0, 0         			# return 0 from function main
+    	jr   	$ra            			#
+
 	sub	$t1, $t1, 1			# g--;
 	b	loop_reverse_print_generation	# goto loop_reverse_print_generation;
 
@@ -200,7 +224,19 @@ not_reverse:
 
 loop_print_generation:
 	ble	$t1, $s2, end_loop_print_generation	# if (g <= n_generations) goto end_loop_print_generation;
-			# function call: print_generation(world_size, g);
+
+	# function call: print_generation(world_size, g);
+	sub  	$sp, $sp, 4    			# move stack pointer down to make room
+    	sw   	$ra, 0($sp)    			# save $ra on $stack
+
+    	jal  	print_generation		# set $ra to following address
+
+    	lw   	$ra, 0($sp)    			# recover $ra from $stack
+    	add  	$sp, $sp, 4    			# move stack pointer back to what it was
+
+    	li   	$v0, 0         			# return 0 from function main
+    	jr   	$ra            			#
+
 	add	$t1, $t1, 1			# g++;
 	b	loop_print_generation		# goto loop_print_generation:
 
@@ -239,7 +275,7 @@ run_generation:
 	# REPLACE THIS COMMENT WITH YOUR CODE FOR `run_generation'.
 	#
 
-	jr	$ra
+	jr	$ra				# return from function run_generation
 
 
 	#
@@ -261,4 +297,4 @@ print_generation:
 	# REPLACE THIS COMMENT WITH YOUR CODE FOR `print_generation'.
 	#
 
-	jr	$ra
+	jr	$ra              		# return from function print_generation
