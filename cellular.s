@@ -49,7 +49,7 @@ error_n_generations:	.asciiz "Invalid number of generations\n"
 	# $t4 = 1 | alive
 	# $t5 = the number '2' then middle element address for the 1st row
 	# $t6 = floor($s0 / 2) | world_size / 2 (Whole Number)
-	# $t7 = $s0 mod 2 | World_size / 2 (MOD 2)
+	# $t7 = 
 
 	# $s0 = int world_size 
 	# $s1 = int rule 
@@ -57,9 +57,8 @@ error_n_generations:	.asciiz "Invalid number of generations\n"
 	# $s3 = int reverse
 	# $s4 = int g = 1;
 
-	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR
-	# ORIGINAL VALUE WHEN `run_generation' FINISHES
-	#
+	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR ORIGINAL VALUE WHEN `main' FINISHES
+	# Most of the $t registers will change while all $s registers will not change
 
 main:
 
@@ -164,10 +163,7 @@ positive_gen:
 	li	$t5, 2				# $t5 = 2
 	div	$s0, $t5			# $s0 / 2
 	mflo	$t6				# $t6 = floor($s0 / 2) | world_size / 2 (Whole Number)
-	mfhi	$t7				# $t7 = $s0 mod 2 | World_size / 2 (MOD 2)
-	#beq	$t7, 0, even			# if $7 == 0 then even
-	#add 	$t6, $t6, 1
-#even:
+
 	li 	$t4, 1				# $t4 = 1 | alive
 
 	#cells[0][world_size / 2] = 1;
@@ -247,14 +243,12 @@ end_loop_print_generation:
 	#li	$v0, 10
 	#syscall
 
-	#
+# --------------------------------- Run Generation Function --------------------------------- #
+
 	# Given `world_size', `which_generation', and `rule', calculate
 	# a new generation according to `rule' and store it in `cells'.
-	#
 
-	#
-	# REPLACE THIS COMMENT WITH A LIST OF THE REGISTERS USED IN
-	# `run_generation', AND THE PURPOSES THEY ARE ARE USED FOR
+	# A LIST OF THE REGISTERS USED IN `run_generation', AND THE PURPOSES THEY ARE USED FOR
 	# $t0 = int x 
 	# $t1 = address of the first element in the array
 	# $t2 = x + 1 					-> 	value in the address of centre -> centre << 1
@@ -275,14 +269,11 @@ end_loop_print_generation:
 	# $s6 =	int centre
 	# $s7 = int right
 	
-
-	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR
-	# ORIGINAL VALUE WHEN `run_generation' FINISHES
-	#
+	# REGISTERS THAT DO NOT HAVE THEIR ORIGINAL VALUE WHEN `run_generation' FINISHES
+	# Most of the $t registers will change while all $s registers will not change
 
 run_generation:
 
-	# REPLACE THIS COMMENT WITH YOUR CODE FOR `run_generation'.
 	li 	$t0, 0				# int x = 0;
 
 loop_run_gen:
@@ -371,22 +362,38 @@ cell_determined:
 end_loop_run_gen:
 
 	jr	$ra				# return from function run_generation
-	#
-	# Given `world_size', and `which_generation', print out the
-	# specified generation.
-	#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ End of Run Generation Function ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 
-	#
-	# REPLACE THIS COMMENT WITH A LIST OF THE REGISTERS USED IN
-	# `print_generation', AND THE PURPOSES THEY ARE ARE USED FOR
-	#
-	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR
-	# ORIGINAL VALUE WHEN `print_generation' FINISHES
-	#
+# -------------------------------- Print Generation Function -------------------------------- #
+
+	# Given `world_size', and `which_generation', print out the specified generation.
+
+	# LIST OF THE REGISTERS USED IN `print_generation', AND WHAT THEY ARE ARE USED FOR
+	# $t0 = int x 
+	# $t1 = the address of the first element in the array
+	# $t2 = address of cells[which_generation][x]
+	# $t3 = the value of cells[which_generation][x]
+	# $t4 = 
+	# $t5 = 
+	# $t6 = row Number-> particular element
+	# $t7 = 
+	# $t8 = 
+	# $t9 = 
+
+	# $s0 = int world_size 
+	# $s1 = 
+	# $s2 = 
+	# $s3 = 
+	# $s4 = int g
+	# $s5 =	
+	# $s6 =	
+	# $s7 = 
+
+	# REGISTERS THAT DO NOT HAVE THEIR ORIGINAL VALUE WHEN `print_generation' FINISHES
+	# Most of the $t registers will change while all $s registers will not change
 
 print_generation:
 
-	# REPLACE THIS COMMENT WITH YOUR CODE FOR `print_generation'.
 	move 	$a0, $s4       			# load which_generation into $a0
     	li 	$v0, 1           		# printf("%d", which_generation);
     	syscall
@@ -429,3 +436,5 @@ end_print_loop:
     	syscall
 
 	jr	$ra              		# return from function print_generation
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ End of Print Generation Function ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
