@@ -155,7 +155,7 @@ valid_gen:
 	li 	$s3, 0				# int reverse = 0;
 	bge	$s2, 0, positive_gen		# if (n_generations >= 0) goto positive_gen;
 	li 	$s3, 1				# reverse = 1;
-	neg 	$s2, $s2				# n_generations = -n_generations;
+	neg 	$s2, $s2			# n_generations = -n_generations;
 
 positive_gen:
 
@@ -165,9 +165,9 @@ positive_gen:
 	div	$s0, $t5			# $s0 / 2
 	mflo	$t6				# $t6 = floor($s0 / 2) | world_size / 2 (Whole Number)
 	mfhi	$t7				# $t7 = $s0 mod 2 | World_size / 2 (MOD 2)
-	beq	$t7, 0, even			# if $7 == 0 then even
-	add 	$t6, $t6, 1
-even:
+	#beq	$t7, 0, even			# if $7 == 0 then even
+	#add 	$t6, $t6, 1
+#even:
 	li 	$t4, 1				# $t4 = 1 | alive
 
 	#cells[0][world_size / 2] = 1;
@@ -217,7 +217,7 @@ not_reverse:
 	li 	$s4, 0				# int g = 0;
 
 loop_print_generation:
-	ble	$s4, $s2, end_loop_print_generation	# if (g <= n_generations) goto end_loop_print_generation;
+	bgt	$s4, $s2, end_loop_print_generation	# if (g > n_generations) goto end_loop_print_generation;
 
 	# function call: print_generation(world_size, g);
 	sub  	$sp, $sp, 4    			# move stack pointer down to make room
@@ -257,12 +257,14 @@ end_loop_print_generation:
 	# `run_generation', AND THE PURPOSES THEY ARE ARE USED FOR
 	# $t0 = int x 
 	# $t1 = address of the first element in the array
-	# $t2 = x + 1
-	# $t3 = 
-	# $t4 = int y = world_size - 1;
-	# $t5 = which_generation - 1 | aka g - 1
+	# $t2 = x + 1 					-> 	value in the address of centre -> centre << 1
+	# $t3 = value in the address of right
+	# $t4 = int y = world_size - 1 			-> 	int state
+	# $t5 = which_generation - 1 | aka g - 1 	-> 	int bit
 	# $t6 = row Number-> particular element
-	# $t7 = x - 1
+	# $t7 = x - 1 					->	int set
+	# $t8 = the value in the address of left
+	# $t9 = 1 or 0
 
 	# $s0 = int world_size 
 	# $s1 = int rule 
@@ -384,8 +386,46 @@ end_loop_run_gen:
 
 print_generation:
 
-	#
 	# REPLACE THIS COMMENT WITH YOUR CODE FOR `print_generation'.
-	#
+	move 	$a0, $s4       			# load which_generation into $a0
+    	li 	$v0, 1           		# printf("%d", which_generation);
+    	syscall
+	
+	li   	$a0, '\t'      			# putchar('\t');
+	li   	$v0, 11
+    	syscall
+
+	li	$t0, 0				# int x = 0;
+loop_print:
+	la	$t1, cells			# load up the first address for the element in the array
+	bge	$t0, $s0, end_print_loop	# if (x >= world_size) goto end_print_loop
+	# cells[which_generation][x]
+	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
+	add	$t6, $t6, $t0			# row_number + x = particular element
+	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
+	add	$t2, $t6, $t1			# $t2 is pointing at cells[which_generation][x]
+	lw	$t3, ($t2)			# $t3 is the value of cells[which_generation][x]
+	beq	$t3, 0, dead_cell		# if (cells[which_generation][x] == 0) goto dead_cell;
+
+	li   	$a0, ALIVE_CHAR      		# putchar(ALIVE_CHAR);
+	li   	$v0, 11
+    	syscall
+	b	cell_printed			# branch to cell_printed
+	
+dead_cell:
+
+	li   	$a0, DEAD_CHAR      		# putchar(DEAD_CHAR);
+	li   	$v0, 11
+    	syscall
+
+cell_printed:
+
+	add	$t0, $t0, 1			# x++;
+	b	loop_print			# branch to loop_print
+
+end_print_loop:
+	li   	$a0, '\n'      			# putchar('\n');
+	li   	$v0, 11
+    	syscall
 
 	jr	$ra              		# return from function print_generation
