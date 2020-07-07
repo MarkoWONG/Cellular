@@ -43,19 +43,24 @@ error_n_generations:	.asciiz "Invalid number of generations\n"
 
 	# LIST OF THE REGISTERS USED IN `main', AND THE PURPOSES THEY ARE ARE USED FOR
 	# $t0 = address for the first element in the array
-	# $t1 = 
-	# $t2 =
-	# $t3 = 
+	# $t1 = NOT USED
+	# $t2 = NOT USED
+	# $t3 = NOT USED
 	# $t4 = 1 | alive
 	# $t5 = the number '2' then middle element address for the 1st row
 	# $t6 = floor($s0 / 2) | world_size / 2 (Whole Number)
-	# $t7 = 
+	# $t7 = NOT USED
+	# $t8 = NOT USED
+	# $t9 = NOT USED
 
 	# $s0 = int world_size 
 	# $s1 = int rule 
 	# $s2 = int n_generations 
 	# $s3 = int reverse
 	# $s4 = int g = 1;
+	# $s5 = NOT USED
+	# $s6 = NOT USED
+	# $s7 = NOT USED
 
 	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR ORIGINAL VALUE WHEN `main' FINISHES
 	# Most of the $t registers will change while all $s registers will not change
@@ -174,7 +179,7 @@ positive_gen:
 	li 	$s4, 1				# int g = 1;
 
 loop_run_generations:
-	bgt	$s4, $s2, end_run_generation	# if (g > n_generations) goto end_run_generation
+	bgt	$s4, $s2, end_loop_run_generation	# if (g > n_generations) goto end_run_generation
 
 	# function call: run_generation(world_size, g, rule);
 	sub  	$sp, $sp, 4   			# move stack pointer down to make room
@@ -187,7 +192,7 @@ loop_run_generations:
 
 	add 	$s4, $s4, 1;
 	b	loop_run_generations		# goto loop_run_generations
-end_run_generation:
+end_loop_run_generation:
 
 	beq	$s3, 0, not_reverse		# if (reverse == 0) goto not_reverse;
 	move 	$s4, $s2 			# int g = n_generations;
@@ -238,14 +243,15 @@ end_loop_print_generation:
 	# Given `world_size', `which_generation', and `rule', calculate
 	# a new generation according to `rule' and store it in `cells'.
 
+	# Note that '->' means it transforms into something else.
 	# A LIST OF THE REGISTERS USED IN `run_generation', AND THE PURPOSES THEY ARE USED FOR
 	# $t0 = int x 
-	# $t1 = address of the first element in the array
+	# $t1 = address of the first element in the array 
 	# $t2 = x + 1 					-> 	value in the address of centre -> centre << 1
 	# $t3 = value in the address of right
 	# $t4 = int y = world_size - 1 			-> 	int state
 	# $t5 = which_generation - 1 | aka g - 1 	-> 	int bit
-	# $t6 = row Number-> particular element
+	# $t6 = row Number				-> 	particular element
 	# $t7 = x - 1 					->	int set
 	# $t8 = the value in the address of left	->  	pointing at the address of new element
 	# $t9 = 1 or 0
@@ -364,21 +370,21 @@ end_loop_run_gen:
 	# $t1 = the address of the first element in the array
 	# $t2 = address of cells[which_generation][x]
 	# $t3 = the value of cells[which_generation][x]
-	# $t4 = 
-	# $t5 = 
+	# $t4 = NOT USED
+	# $t5 = NOT USED
 	# $t6 = row Number-> particular element
-	# $t7 = 
-	# $t8 = 
-	# $t9 = 
+	# $t7 = NOT USED
+	# $t8 = NOT USED
+	# $t9 = NOT USED
 
 	# $s0 = int world_size 
-	# $s1 = 
-	# $s2 = 
-	# $s3 = 
+	# $s1 = NOT USED
+	# $s2 = NOT USED
+	# $s3 = NOT USED
 	# $s4 = int g
-	# $s5 =	
-	# $s6 =	
-	# $s7 = 
+	# $s5 =	NOT USED
+	# $s6 =	NOT USED
+	# $s7 = NOT USED
 
 	# REGISTERS THAT DO NOT HAVE THEIR ORIGINAL VALUE WHEN `print_generation' FINISHES
 	# Most of the $t registers will change while all $s registers will not change
@@ -394,7 +400,7 @@ print_generation:
     	syscall
 
 	li	$t0, 0				# int x = 0;
-loop_print:
+print_loop:
 	la	$t1, cells			# load up the first address for the element in the array
 	bge	$t0, $s0, end_print_loop	# if (x >= world_size) goto end_print_loop
 	# cells[which_generation][x]
@@ -419,7 +425,7 @@ dead_cell:
 cell_printed:
 
 	add	$t0, $t0, 1			# x++;
-	b	loop_print			# branch to loop_print
+	b	print_loop			# branch to print_loop
 
 end_print_loop:
 	li   	$a0, '\n'      			# putchar('\n');
