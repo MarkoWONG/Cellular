@@ -158,8 +158,7 @@ valid_gen:
 
 positive_gen:
 
-    #the first generation always has a only single cell which is alive
-    #this cell is in the middle of the world	
+    	# the first generation always has a only single cell which is alive this cell is in the middle of the world	
 	li	$t5, 2				# $t5 = 2
 	div	$s0, $t5			# $s0 / 2
 	mflo	$t6				# $t6 = floor($s0 / 2) | world_size / 2 (Whole Number)
@@ -257,7 +256,7 @@ end_loop_print_generation:
 	# $t5 = which_generation - 1 | aka g - 1 	-> 	int bit
 	# $t6 = row Number-> particular element
 	# $t7 = x - 1 					->	int set
-	# $t8 = the value in the address of left
+	# $t8 = the value in the address of left	->  	pointing at the address of new element
 	# $t9 = 1 or 0
 
 	# $s0 = int world_size 
@@ -283,6 +282,7 @@ loop_run_gen:
 	sub 	$t5, $s4, 1			# which_generation - 1
 	la	$t1, cells			# load up the first address for the element in the array
 	ble	$t0, 0, first_time		# if (x <= 0) goto first_time;
+
 	# left = cells[which_generation - 1][x - 1];
 	sub	$t7, $t0, 1			# x - 1
 	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size | this determines the row number
@@ -333,16 +333,16 @@ not_end_of_row:
 
 	li 	$t5, 1				# int bit = 1
 	sllv	$t5, $t5, $t4			# int bit = 1 << state
-	and	$t7, $s2, $t5			# int set = rule & bit
+	and	$t7, $s1, $t5			# int set = rule & bit
 
 	beq	$t7, 0, dead			# if (set == 0) goto dead
 	# cells[which_generation][x] = 1
 	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
-	add	$s6, $t6, $t1			# $s6 is pointing at that particular element aka centre
+	add	$t8, $t6, $t1			# $t8 is pointing at new element
 	li 	$t9, 1				# $t9 = 1
-	sw	$t9, ($s6)			# cells[which_generation][x] = 1
+	sw	$t9, ($t8)			# cells[which_generation][x] = 1
 
 	b	cell_determined			# branch to cell_determined
 dead:
@@ -350,9 +350,9 @@ dead:
 	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
-	add	$s6, $t6, $t1			# $s6 is pointing at that particular element aka centre
+	add	$t8, $t6, $t1			# $t8 is pointing at that particular element aka centre
 	li 	$t9, 0				# $t9 = 0
-	sw	$t9, ($s6)			# cells[which_generation][x] = 1
+	sw	$t9, ($t8)			# cells[which_generation][x] = 0
 
 cell_determined:
 	
