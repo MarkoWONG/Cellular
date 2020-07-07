@@ -1,6 +1,4 @@
-########################################################################
 # COMP1521 20T2 --- assignment 1: a cellular automaton renderer
-#
 # Written by Marko Wong (z5309371) 04/July/2020.
 
 
@@ -20,7 +18,7 @@ DEAD_CHAR	= '.'
 
 # Maximum number of bytes needs to store all generations of cells.
 
-MAX_CELLS_BYTES	= (MAX_GENERATIONS + 1) * MAX_WORLD_SIZE
+MAX_CELLS_BYTES	= ((MAX_GENERATIONS + 1) * MAX_WORLD_SIZE) * 4
 
 	.data
 
@@ -40,6 +38,8 @@ prompt_n_generations:	.asciiz "Enter how many generations: "
 error_n_generations:	.asciiz "Invalid number of generations\n"
 
 	.text
+
+# ---------------------------------- Start of Main Function ---------------------------------- #
 
 	# LIST OF THE REGISTERS USED IN `main', AND THE PURPOSES THEY ARE ARE USED FOR
 	# $t0 = address for the first element in the array
@@ -124,7 +124,7 @@ valid_rule:
 
     	li 	$v0, 5   			# scanf("%d", &n_generations);
     	syscall
-	move 	$s2, $v0				# int n_generations = %d, n_generations;
+	move 	$s2, $v0			# int n_generations = %d, n_generations;
 
     	bge	$s2, MIN_GENERATIONS, gen_not_to_small	# if (n_generations >= MIN_GENERATIONS) goto valid_gen;
 	la 	$a0, error_n_generations	# printf("Invalid number of generations\n");
@@ -228,19 +228,10 @@ loop_print_generation:
 
 end_loop_print_generation:
 
-
-	
-	# replace the syscall below with
-	#
 	li	$v0, 0
 	jr	$ra
-	#
-	# if your code for `main' preserves $ra by saving it on the
-	# stack, and restoring it after calling `print_world' and
-	# `run_generation'.  [ there are style marks for this ]
 
-	#li	$v0, 10
-	#syscall
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ End of Main Function ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 
 # --------------------------------- Run Generation Function --------------------------------- #
 
@@ -285,7 +276,7 @@ loop_run_gen:
 
 	# left = cells[which_generation - 1][x - 1];
 	sub	$t7, $t0, 1			# x - 1
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size | this determines the row number
+	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size
 	add	$t6, $t6, $t7			# row_number + (x - 1) = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s5, $t6, $t1			# $s5 is pointing at that particular element aka left
@@ -297,7 +288,7 @@ first_time:
 not_first_time:
 
 	# int centre = cells[which_generation - 1][x];
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size | this determines the row number
+	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size 
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s6, $t6, $t1			# $s6 is pointing at that particular element aka centre
@@ -308,7 +299,7 @@ not_first_time:
 
 	# right = cells[which_generation - 1][x + 1];
 	add	$t2, $t0, 1			# x + 1
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size | this determines the row number
+	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size 
 	add	$t6, $t6, $t2			# row_number + (x + 1) = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s7, $t6, $t1			# $s7 is pointing at that particular element aka right
@@ -337,7 +328,7 @@ not_end_of_row:
 
 	beq	$t7, 0, dead			# if (set == 0) goto dead
 	# cells[which_generation][x] = 1
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
+	mul	$t6, $s4, $s0			# row_number = which_generation * world_size 
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t8, $t6, $t1			# $t8 is pointing at new element
@@ -347,7 +338,7 @@ not_end_of_row:
 	b	cell_determined			# branch to cell_determined
 dead:
 	# cells[which_generation][x] = 0
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
+	mul	$t6, $s4, $s0			# row_number = which_generation * world_size
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t8, $t6, $t1			# $t8 is pointing at that particular element aka centre
@@ -407,7 +398,7 @@ loop_print:
 	la	$t1, cells			# load up the first address for the element in the array
 	bge	$t0, $s0, end_print_loop	# if (x >= world_size) goto end_print_loop
 	# cells[which_generation][x]
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size | this determines the row number
+	mul	$t6, $s4, $s0			# row_number = which_generation * world_size
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t2, $t6, $t1			# $t2 is pointing at cells[which_generation][x]
