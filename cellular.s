@@ -42,6 +42,11 @@ error_n_generations:	.asciiz "Invalid number of generations\n"
 # ---------------------------------- Start of Main Function ---------------------------------- #
 
 	# LIST OF THE REGISTERS USED IN `main', AND THE PURPOSES THEY ARE ARE USED FOR
+
+	# $a1 = int world_size
+	# $a2 = int g (used to track which row of the array to being modified)
+	# $a3 = int rule
+	
 	# $t0 = address for the first element in the array
 	# $t1 = NOT USED
 	# $t2 = NOT USED
@@ -57,13 +62,13 @@ error_n_generations:	.asciiz "Invalid number of generations\n"
 	# $s1 = int rule 
 	# $s2 = int n_generations 
 	# $s3 = int reverse
-	# $s4 = int g = 1;
+	# $s4 = int g (used to track which row of the array to being modified)
 	# $s5 = NOT USED
 	# $s6 = NOT USED
 	# $s7 = NOT USED
 
 	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR ORIGINAL VALUE WHEN `main' FINISHES
-	# Most of the $t registers will change while all $s registers will not change
+	# None as the original value is defined in the main function.
 
 main:
 
@@ -103,7 +108,7 @@ vaild_world_size:
     	syscall
 	move 	$s1, $v0			# int rule = %d, rule;
 
-    	bge	$s1, MIN_RULE, rule_not_to_small	#if (rule >= MIN_RULE) goto rule_not_to_small; 
+    	bge	$s1, MIN_RULE, rule_not_to_small	# if (rule >= MIN_RULE) goto rule_not_to_small; 
 	la 	$a0, error_rule			# printf("Invalid rule\n");
     	li 	$v0, 4
     	syscall
@@ -182,6 +187,10 @@ loop_run_generations:
 	bgt	$s4, $s2, end_loop_run_generation	# if (g > n_generations) goto end_run_generation
 
 	# function call: run_generation(world_size, g, rule);
+	move	$a1, $s0			# copy $s0 into $a1 because passing agruments need to be in $a registers
+	move 	$a2, $s4			# copy $s4 into $a2 because passing agruments need to be in $a registers
+	move	$a3, $s1			# copy $s1 into $a3 because passing agruments need to be in $a registers
+
 	sub  	$sp, $sp, 4   			# move stack pointer down to make room
     	sw   	$ra, 0($sp)    			# save $ra on $stack
 
@@ -201,6 +210,9 @@ loop_reverse_print_generation:
 	blt	$s4, 0, end_loop_print_generation	# if (g < 0) goto end_loop_print_generation;
 
 	# function call: print_generation(world_size, g);
+	move	$a1, $s0			# copy $s0 into $a1 because passing agruments need to be in $a registers
+	move 	$a2, $s4			# copy $s4 into $a2 because passing agruments need to be in $a registers
+
 	sub  	$sp, $sp, 4    			# move stack pointer down to make room
     	sw   	$ra, 0($sp)    			# save $ra on $stack
 
@@ -217,6 +229,10 @@ not_reverse:
 	li 	$s4, 0				# int g = 0;
 
 loop_print_generation:
+
+	move	$a1, $s0			# copy $s0 into $a1 because passing agruments need to be in $a registers
+	move 	$a2, $s4			# copy $s4 into $a2 because passing agruments need to be in $a registers
+
 	bgt	$s4, $s2, end_loop_print_generation	# if (g > n_generations) goto end_loop_print_generation;
 
 	# function call: print_generation(world_size, g);
@@ -245,7 +261,12 @@ end_loop_print_generation:
 
 	# Note that '->' means it transforms into something else.
 	# A LIST OF THE REGISTERS USED IN `run_generation', AND THE PURPOSES THEY ARE USED FOR
-	# $t0 = int x 
+
+	# $a1 = int world_size
+	# $a2 = int g (used to track which row of the array to being modified)
+	# $a3 = int rule
+
+	# $t0 = int x (used to track which column of the array to being modified)
 	# $t1 = address of the first element in the array 
 	# $t2 = x + 1 					-> 	value in the address of centre -> centre << 1
 	# $t3 = value in the address of right
@@ -260,16 +281,18 @@ end_loop_print_generation:
 	# $s1 = int rule 
 	# $s2 = int n_generations 
 	# $s3 = int reverse
-	# $s4 = int g = 1
+	# $s4 = int g (used to track which row of the array to being modified)
 	# $s5 =	int left
 	# $s6 =	int centre
 	# $s7 = int right
 	
 	# REGISTERS THAT DO NOT HAVE THEIR ORIGINAL VALUE WHEN `run_generation' FINISHES
-	# Most of the $t registers will change while all $s registers will not change
+	# All $t registers as they will all be resued in other functions.
 
 run_generation:
-
+	move 	$s0, $a1			# unpacking the agument of world_size into register $s0
+	move	$s4, $a2			# unpacking the agument of g into register $s4
+	move	$s1, $a3			# unpacking the agument of rule into register $s1
 	li 	$t0, 0				# int x = 0;
 
 loop_run_gen:
@@ -358,6 +381,11 @@ cell_determined:
 	
 end_loop_run_gen:
 
+	# Restoring $s registers to orginal value.
+	li	$s5, 0				# Restoring $s5 registers to orginal value.
+	li	$s6, 0				# Restoring $s6 registers to orginal value.
+	li	$s7, 0				# Restoring $s7 registers to orginal value.
+
 	jr	$ra				# return from function run_generation
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ End of Run Generation Function ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 
@@ -366,6 +394,10 @@ end_loop_run_gen:
 	# Given `world_size', and `which_generation', print out the specified generation.
 
 	# LIST OF THE REGISTERS USED IN `print_generation', AND WHAT THEY ARE ARE USED FOR
+
+	# $a1 = int world_size 
+	# $a2 = int g 
+
 	# $t0 = int x 
 	# $t1 = the address of the first element in the array
 	# $t2 = address of cells[which_generation][x]
@@ -387,9 +419,11 @@ end_loop_run_gen:
 	# $s7 = NOT USED
 
 	# REGISTERS THAT DO NOT HAVE THEIR ORIGINAL VALUE WHEN `print_generation' FINISHES
-	# Most of the $t registers will change while all $s registers will not change
+	# All $t registers used in this function, as they will all be resued in other functions.
 
 print_generation:
+	move 	$s0, $a1			# unpacking the agument of world_size into register $s0
+	move	$s4, $a2			# unpacking the agument of g into register $s4
 
 	move 	$a0, $s4       			# load which_generation into $a0
     	li 	$v0, 1           		# printf("%d", which_generation);
