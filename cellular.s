@@ -290,22 +290,19 @@ end_loop_print_generation:
 	# All $t registers as they will all be resued in other functions.
 
 run_generation:
-	move 	$s0, $a1			# unpacking the agument of world_size into register $s0
-	move	$s4, $a2			# unpacking the agument of g into register $s4
-	move	$s1, $a3			# unpacking the agument of rule into register $s1
 	li 	$t0, 0				# int x = 0;
 
 loop_run_gen:
-	bge	$t0, $s0, end_loop_run_gen	# if (x >= world_size) goto end_loop_run_gen;
+	bge	$t0, $a1, end_loop_run_gen	# if (x >= world_size) goto end_loop_run_gen;
 
 	li	$s5, 0				# int left = 0;
-	sub 	$t5, $s4, 1			# which_generation - 1
+	sub	$t5, $a2, 1			# which_generation - 1
 	la	$t1, cells			# load up the first address for the element in the array
 	ble	$t0, 0, first_time		# if (x <= 0) goto first_time;
 
 	# left = cells[which_generation - 1][x - 1];
 	sub	$t7, $t0, 1			# x - 1
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size
+	mul	$t6, $t5, $a1			# row_number = which_generation - 1 * world_size
 	add	$t6, $t6, $t7			# row_number + (x - 1) = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s5, $t6, $t1			# $s5 is pointing at that particular element aka left
@@ -317,18 +314,18 @@ first_time:
 not_first_time:
 
 	# int centre = cells[which_generation - 1][x];
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size 
+	mul	$t6, $t5, $a1			# row_number = which_generation - 1 * world_size 
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s6, $t6, $t1			# $s6 is pointing at that particular element aka centre
 
 	li	$s7, 0				# int right = 0;
-	sub	$t4, $s0, 1			# int y = world_size - 1;
+	sub	$t4, $a1, 1			# int y = world_size - 1;
 	bge	$t0, $t4, end_of_row		# if (x >= y) goto end_of_row;
 
 	# right = cells[which_generation - 1][x + 1];
 	add	$t2, $t0, 1			# x + 1
-	mul	$t6, $t5, $s0			# row_number = which_generation - 1 * world_size 
+	mul	$t6, $t5, $a1			# row_number = which_generation - 1 * world_size 
 	add	$t6, $t6, $t2			# row_number + (x + 1) = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per cell
 	add	$s7, $t6, $t1			# $s7 is pointing at that particular element aka right
@@ -353,11 +350,11 @@ not_end_of_row:
 
 	li 	$t5, 1				# int bit = 1
 	sllv	$t5, $t5, $t4			# int bit = 1 << state
-	and	$t7, $s1, $t5			# int set = rule & bit
+	and	$t7, $a3, $t5			# int set = rule & bit
 
 	beq	$t7, 0, dead			# if (set == 0) goto dead
 	# cells[which_generation][x] = 1
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size 
+	mul	$t6, $a2, $a1			# row_number = which_generation * world_size 
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t8, $t6, $t1			# $t8 is pointing at new element
@@ -367,7 +364,7 @@ not_end_of_row:
 	b	cell_determined			# branch to cell_determined
 dead:
 	# cells[which_generation][x] = 0
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size
+	mul	$t6, $a2, $a1			# row_number = which_generation * world_size
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t8, $t6, $t1			# $t8 is pointing at that particular element aka centre
@@ -422,11 +419,8 @@ end_loop_run_gen:
 	# All $t registers used in this function, as they will all be resued in other functions.
 
 print_generation:
-	move 	$s0, $a1			# unpacking the agument of world_size into register $s0
-	move	$s4, $a2			# unpacking the agument of g into register $s4
-
-	move 	$a0, $s4       			# load which_generation into $a0
-    	li 	$v0, 1           		# printf("%d", which_generation);
+	move 	$a0, $a2       			# load which_generation into $a0
+    	li	$v0, 1           		# printf("%d", which_generation);
     	syscall
 	
 	li   	$a0, '\t'      			# putchar('\t');
@@ -436,9 +430,9 @@ print_generation:
 	li	$t0, 0				# int x = 0;
 print_loop:
 	la	$t1, cells			# load up the first address for the element in the array
-	bge	$t0, $s0, end_print_loop	# if (x >= world_size) goto end_print_loop
+	bge	$t0, $a1, end_print_loop	# if (x >= world_size) goto end_print_loop
 	# cells[which_generation][x]
-	mul	$t6, $s4, $s0			# row_number = which_generation * world_size
+	mul	$t6, $a2, $a1			# row_number = which_generation * world_size
 	add	$t6, $t6, $t0			# row_number + x = particular element
 	mul	$t6, $t6, 4			# assuming there is 4 bytes per element
 	add	$t2, $t6, $t1			# $t2 is pointing at cells[which_generation][x]
