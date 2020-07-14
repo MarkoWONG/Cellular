@@ -277,11 +277,11 @@ end_loop_print_generation:
 	# $t8 = the value in the address of left	->  	pointing at the address of new element
 	# $t9 = 1 or 0
 
-	# $s0 = int world_size 
+	# $s0 = NOT USED
 	# $s1 = int rule 
 	# $s2 = int n_generations 
 	# $s3 = int reverse
-	# $s4 = int g (used to track which row of the array to being modified)
+	# $s4 = NOT USED
 	# $s5 =	int left
 	# $s6 =	int centre
 	# $s7 = int right
@@ -406,11 +406,11 @@ end_loop_run_gen:
 	# $t8 = NOT USED
 	# $t9 = NOT USED
 
-	# $s0 = int world_size 
+	# $s0 = NOT USED
 	# $s1 = NOT USED
 	# $s2 = NOT USED
 	# $s3 = NOT USED
-	# $s4 = int g
+	# $s4 = NOT USED
 	# $s5 =	NOT USED
 	# $s6 =	NOT USED
 	# $s7 = NOT USED
